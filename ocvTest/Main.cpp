@@ -1,4 +1,4 @@
-#include "Detection/EllipseDetectorYaed.h"
+#include "Detection/YAED.h"
 #include <conio.h>
 #include <mutex>
 #include <atomic>
@@ -117,47 +117,31 @@ void Detect(std::vector<CImage>& images)
 		if (finish)
 			break;
 
-		cv::Size sz = images[index].mat.size();
 
 		cv::Mat1b gray;
 		cvtColor(images[index].mat, gray, CV_BGR2GRAY);
 
+		cv::Size size = images[index].mat.size();
+		float taoCenters = 0.05f;
+		float maxCenterDistance = sqrtf(size.width * size.width + size.height * size.height) * taoCenters;
+
+		CYAED yaed;
 		// Parameters Settings (Sect. 4.2)
-		int		iThLength = 16;
-		float	fThObb = 3.0f;
-		float	fThPos = 1.0f;
-		float	fTaoCenters = 0.05f;
-		int 	iNs = 16;
-		float	fMaxCenterDistance = sqrt(float(sz.width * sz.width + sz.height * sz.height)) * fTaoCenters;
-
-		float	fThScore = 0.62f;
-
-		// Other constant parameters settings. 
-
-		cv::Size szPreProcessingGaussKernelSize = cv::Size(5, 5);
-		double	dPreProcessingGaussSigma = 1.0;
-
-		float	fDistanceToEllipseContour = 0.1f;	// (Sect. 3.3.1 - Validation)
-		float	fMinReliability = 0.6f;	// Const parameters to discard bad ellipses
-
-
-		CEllipseDetectorYaed yaed;
-		yaed.SetParameters(szPreProcessingGaussKernelSize,
-			dPreProcessingGaussSigma,
-			fThPos,
-			fMaxCenterDistance,
-			iThLength,
-			fThObb,
-			fDistanceToEllipseContour,
-			fThScore,
-			fMinReliability,
-			iNs
+		yaed.SetParameters(cv::Size(5, 5),
+			1.0,
+			1.0f,
+			maxCenterDistance,
+			16,
+			3.0f,
+			0.1f, // Sect. 3.3.1 - Validation
+			0.62f,
+			0.6f,
+			16
 		);
-
 
 		std::vector<Ellipse> ellipses;
 		yaed.Detect(gray, ellipses);
-		
+
 		//yaed.DrawDetectedEllipses(images[index].mat, ellipses);
 		//imshow("Yaed", images[index].mat);
 		//waitKey();
@@ -188,10 +172,10 @@ int main(int argc, char* argv[])
 	std::vector<std::thread> detectThreads;
 
 	for (int i = 0; i < readThreadCount; ++i)
-		readThreads.push_back(std::thread (Read, folders[i], std::ref(images)));
+		readThreads.push_back(std::thread(Read, folders[i], std::ref(images)));
 
 	for (int i = 0; i < detectThreadCount; ++i)
-		detectThreads.push_back(std::thread (Detect, std::ref(images)));
+		detectThreads.push_back(std::thread(Detect, std::ref(images)));
 
 
 	for (size_t i = 0; i < readThreads.size(); ++i)

@@ -24,7 +24,7 @@
     <ClInclude Include="Detection\common.h">
       <Filter>Header Files\Detection</Filter>
     </ClInclude>
-    <ClInclude Include="Detection\EllipseDetectorYaed.h">
+    <ClInclude Include="Detection\YAED.h">
       <Filter>Header Files\Detection</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,11 +32,11 @@
     <ClCompile Include="Detection\common.cpp">
       <Filter>Source Files\Detection</Filter>
     </ClCompile>
-    <ClCompile Include="Detection\EllipseDetectorYaed.cpp">
-      <Filter>Source Files\Detection</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Detection\YAED.cpp">
+      <Filter>Source Files\Detection</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

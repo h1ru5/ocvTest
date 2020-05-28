@@ -4,9 +4,9 @@ You are free to use and modify the code, at your own risk.
 
 If you use this code, or find it useful, please refer to the paper:
 
-Michele Fornaciari, Andrea Prati, Rita Cucchiara, 
+Michele Fornaciari, Andrea Prati, Rita Cucchiara,
 A fast and effective ellipse detector for embedded vision applications
-Pattern Recognition, Volume 47, Issue 11, November 2014, Pages 3693-3708, ISSN 0031-3203, 
+Pattern Recognition, Volume 47, Issue 11, November 2014, Pages 3693-3708, ISSN 0031-3203,
 http://dx.doi.org/10.1016/j.patcog.2014.05.012.
 (http://www.sciencedirect.com/science/article/pii/S0031320314001976)
 
@@ -19,10 +19,10 @@ michele.fornaciari@unimore.it
 last update: 23/12/2014
 */
 
-#include "EllipseDetectorYaed.h"
+#include "YAED.h"
 
 
-CEllipseDetectorYaed::CEllipseDetectorYaed(void) : _times(6, 0.0), _timesHelper(6, 0.0)
+CYAED::CYAED(void) : _times(6, 0.0), _timesHelper(6, 0.0)
 {
 	// Default Parameters Settings
 	_szPreProcessingGaussKernelSize = Size(5, 5);
@@ -41,11 +41,11 @@ CEllipseDetectorYaed::CEllipseDetectorYaed(void) : _times(6, 0.0), _timesHelper(
 }
 
 
-CEllipseDetectorYaed::~CEllipseDetectorYaed(void)
+CYAED::~CYAED(void)
 {
 }
 
-void CEllipseDetectorYaed::SetParameters(Size	szPreProcessingGaussKernelSize,
+void CYAED::SetParameters(Size	szPreProcessingGaussKernelSize,
 	double	dPreProcessingGaussSigma,
 	float 	fThPosition,
 	float	fMaxCenterDistance,
@@ -55,7 +55,7 @@ void CEllipseDetectorYaed::SetParameters(Size	szPreProcessingGaussKernelSize,
 	float	fMinScore,
 	float	fMinReliability,
 	int     iNs
-	)
+)
 {
 	_szPreProcessingGaussKernelSize = szPreProcessingGaussKernelSize;
 	_dPreProcessingGaussSigma = dPreProcessingGaussSigma;
@@ -72,18 +72,18 @@ void CEllipseDetectorYaed::SetParameters(Size	szPreProcessingGaussKernelSize,
 
 }
 
-uint inline CEllipseDetectorYaed::GenerateKey(uchar pair, ushort u, ushort v)
+uint inline CYAED::GenerateKey(uchar pair, ushort u, ushort v)
 {
 	return (pair << 30) + (u << 15) + v;
 };
 
 
 
-int CEllipseDetectorYaed::FindMaxK(const int* v) const
+int CYAED::FindMaxK(const int* v) const
 {
 	int max_val = 0;
 	int max_idx = 0;
-	for (int i = 0; i<ACC_R_SIZE; ++i)
+	for (int i = 0; i < ACC_R_SIZE; ++i)
 	{
 		(v[i] > max_val) ? max_val = v[i], max_idx = i : NULL;
 	}
@@ -91,11 +91,11 @@ int CEllipseDetectorYaed::FindMaxK(const int* v) const
 	return max_idx + 90;
 };
 
-int CEllipseDetectorYaed::FindMaxN(const int* v) const
+int CYAED::FindMaxN(const int* v) const
 {
 	int max_val = 0;
 	int max_idx = 0;
-	for (int i = 0; i<ACC_N_SIZE; ++i)
+	for (int i = 0; i < ACC_N_SIZE; ++i)
 	{
 		(v[i] > max_val) ? max_val = v[i], max_idx = i : NULL;
 	}
@@ -103,11 +103,11 @@ int CEllipseDetectorYaed::FindMaxN(const int* v) const
 	return max_idx;
 };
 
-int CEllipseDetectorYaed::FindMaxA(const int* v) const
+int CYAED::FindMaxA(const int* v) const
 {
 	int max_val = 0;
 	int max_idx = 0;
-	for (int i = 0; i<ACC_A_SIZE; ++i)
+	for (int i = 0; i < ACC_A_SIZE; ++i)
 	{
 		(v[i] > max_val) ? max_val = v[i], max_idx = i : NULL;
 	}
@@ -116,7 +116,7 @@ int CEllipseDetectorYaed::FindMaxA(const int* v) const
 };
 
 
-float CEllipseDetectorYaed::GetMedianSlope(std::vector<Point2f>& med, Point2f& M, std::vector<float>& slopes)
+float CYAED::GetMedianSlope(std::vector<Point2f>& med, Point2f& M, std::vector<float>& slopes)
 {
 	// med		: std::vector of points
 	// M		: centroid of the points in med
@@ -163,7 +163,7 @@ float CEllipseDetectorYaed::GetMedianSlope(std::vector<Point2f>& med, Point2f& M
 
 
 
-void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Point>& e2, EllipseData& data)
+void CYAED::GetFastCenter(std::vector<Point>& e1, std::vector<Point>& e2, EllipseData& data)
 {
 	data.isValid = true;
 
@@ -204,7 +204,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 			unsigned iSzBin = hsize_2 / unsigned(_uNs);
 			unsigned iIdx = hsize_2 + (iSzBin / 2);
 
-			for (unsigned i = 0; i<_uNs; ++i)
+			for (unsigned i = 0; i < _uNs; ++i)
 			{
 				indexes[i] = iIdx;
 				iIdx += iSzBin;
@@ -217,7 +217,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 
 
 
-		for (uint ii = 0; ii<minPoints; ++ii)
+		for (uint ii = 0; ii < minPoints; ++ii)
 		{
 			uint i = indexes[ii];
 
@@ -234,7 +234,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 			if (sign_begin == 0)
 			{
 				//found
-				med.push_back(Point2f((xb + x1)* 0.5f, (yb + y1)* 0.5f));
+				med.push_back(Point2f((xb + x1) * 0.5f, (yb + y1) * 0.5f));
 				continue;
 			}
 
@@ -245,7 +245,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 			if (sign_end == 0)
 			{
 				//found
-				med.push_back(Point2f((xe + x1)* 0.5f, (ye + y1)* 0.5f));
+				med.push_back(Point2f((xe + x1) * 0.5f, (ye + y1) * 0.5f));
 				continue;
 			}
 
@@ -266,7 +266,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 				if (sign_res == 0)
 				{
 					//found
-					med.push_back(Point2f((x2 + x1)* 0.5f, (y2 + y1)* 0.5f));
+					med.push_back(Point2f((x2 + x1) * 0.5f, (y2 + y1) * 0.5f));
 					break;
 				}
 
@@ -283,7 +283,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 				j = (begin + end) >> 1;
 			}
 
-			med.push_back(Point2f((e1[j].x + x1)* 0.5f, (e1[j].y + y1)* 0.5f));
+			med.push_back(Point2f((e1[j].x + x1) * 0.5f, (e1[j].y + y1) * 0.5f));
 		}
 
 		if (med.size() < 2)
@@ -318,7 +318,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 			unsigned iSzBin = hsize_1 / unsigned(_uNs);
 			unsigned iIdx = hsize_1 + (iSzBin / 2);
 
-			for (unsigned i = 0; i<_uNs; ++i)
+			for (unsigned i = 0; i < _uNs; ++i)
 			{
 				indexes[i] = iIdx;
 				iIdx += iSzBin;
@@ -330,7 +330,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 		}
 
 
-		for (uint ii = 0; ii<minPoints; ++ii)
+		for (uint ii = 0; ii < minPoints; ++ii)
 		{
 			uint i = indexes[ii];
 
@@ -347,7 +347,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 			if (sign_begin == 0)
 			{
 				//found
-				med.push_back(Point2f((xb + x1)* 0.5f, (yb + y1)* 0.5f));
+				med.push_back(Point2f((xb + x1) * 0.5f, (yb + y1) * 0.5f));
 				continue;
 			}
 
@@ -358,7 +358,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 			if (sign_end == 0)
 			{
 				//found
-				med.push_back(Point2f((xe + x1)* 0.5f, (ye + y1)* 0.5f));
+				med.push_back(Point2f((xe + x1) * 0.5f, (ye + y1) * 0.5f));
 				continue;
 			}
 
@@ -379,7 +379,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 				if (sign_res == 0)
 				{
 					//found
-					med.push_back(Point2f((x2 + x1)* 0.5f, (y2 + y1)* 0.5f));
+					med.push_back(Point2f((x2 + x1) * 0.5f, (y2 + y1) * 0.5f));
 					break;
 				}
 
@@ -396,9 +396,9 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 				j = (begin + end) >> 1;
 			}
 
-			med.push_back(Point2f((e2[j].x + x1)* 0.5f, (e2[j].y + y1)* 0.5f));
+			med.push_back(Point2f((e2[j].x + x1) * 0.5f, (e2[j].y + y1) * 0.5f));
 		}
-		
+
 		if (med.size() < 2)
 		{
 			data.isValid = false;
@@ -414,8 +414,8 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 	}
 
 	float invDen = 1 / (q2 - q4);
-	data.Cab.x = (M34.y - q4*M34.x - M12.y + q2*M12.x) * invDen;
-	data.Cab.y = (q2*M34.y - q4*M12.y + q2*q4*(M12.x - M34.x)) * invDen;
+	data.Cab.x = (M34.y - q4 * M34.x - M12.y + q2 * M12.x) * invDen;
+	data.Cab.y = (q2 * M34.y - q4 * M12.y + q2 * q4 * (M12.x - M34.x)) * invDen;
 	data.ta = q2;
 	data.tb = q4;
 	data.Ma = M12;
@@ -425,7 +425,7 @@ void CEllipseDetectorYaed::GetFastCenter(std::vector<Point>& e1, std::vector<Poi
 
 
 
-void CEllipseDetectorYaed::DetectEdges13(Mat1b& DP, VVP& points_1, VVP& points_3)
+void CYAED::DetectEdges13(Mat1b& DP, VVP& points_1, VVP& points_3)
 {
 	// Vector of connected edge points
 	VVP contours;
@@ -487,7 +487,7 @@ void CEllipseDetectorYaed::DetectEdges13(Mat1b& DP, VVP& points_1, VVP& points_3
 };
 
 
-void CEllipseDetectorYaed::DetectEdges24(Mat1b& DN, VVP& points_2, VVP& points_4 )
+void CYAED::DetectEdges24(Mat1b& DN, VVP& points_2, VVP& points_4)
 {
 	// Vector of connected edge points
 	VVP contours;
@@ -538,7 +538,7 @@ void CEllipseDetectorYaed::DetectEdges24(Mat1b& DN, VVP& points_2, VVP& points_4
 
 		int width = abs(right.x - left.x) + 1;
 		int height = abs(right.y - left.y) + 1;
-		int iCountTop = (width *height) - iEdgeSegmentSize - iCountBottom;
+		int iCountTop = (width * height) - iEdgeSegmentSize - iCountBottom;
 
 		if (iCountBottom > iCountTop)
 		{
@@ -554,21 +554,21 @@ void CEllipseDetectorYaed::DetectEdges24(Mat1b& DN, VVP& points_2, VVP& points_4
 };
 
 // Most important function for detecting ellipses. See Sect[3.2.3] of the paper
-void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
-											VP& edge_i,
-											VP& edge_j,
-											VP& edge_k,
-											EllipseData& data_ij,
-											EllipseData& data_ik,
-											std::vector<Ellipse>& ellipses
-										)
+void CYAED::FindEllipses(Point2f& center,
+	VP& edge_i,
+	VP& edge_j,
+	VP& edge_k,
+	EllipseData& data_ij,
+	EllipseData& data_ik,
+	std::vector<Ellipse>& ellipses
+)
 {
 	// Find ellipse parameters
 
 	// 0-initialize accumulators
-	memset(accN, 0, sizeof(int)*ACC_N_SIZE);
-	memset(accR, 0, sizeof(int)*ACC_R_SIZE);
-	memset(accA, 0, sizeof(int)*ACC_A_SIZE);
+	memset(accN, 0, sizeof(int) * ACC_N_SIZE);
+	memset(accR, 0, sizeof(int) * ACC_R_SIZE);
+	memset(accA, 0, sizeof(int) * ACC_A_SIZE);
 
 	Tac(3); //estimation
 
@@ -599,20 +599,20 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 		{
 			float q2 = data_ij.Sa[ij1];
 
-			float q1xq2 = q1*q2;
+			float q1xq2 = q1 * q2;
 
 			for (int ik1 = 0; ik1 < sz_ik1; ++ik1)
 			{
 				float q4 = data_ik.Sa[ik1];
 
-				float q3xq4 = q3*q4;
+				float q3xq4 = q3 * q4;
 
 				// See Eq. [13-18] in the paper
 
 				float a = (q1xq2 - q3xq4);
-				float b = (q3xq4 + 1)*(q1 + q2) - (q1xq2 + 1)*(q3 + q4);
-				float Kp = (-b + sqrt(b*b + 4 * a*a)) / (2 * a);
-				float zplus = ((q1 - Kp)*(q2 - Kp)) / ((1 + q1*Kp)*(1 + q2*Kp));
+				float b = (q3xq4 + 1) * (q1 + q2) - (q1xq2 + 1) * (q3 + q4);
+				float Kp = (-b + sqrt(b * b + 4 * a * a)) / (2 * a);
+				float zplus = ((q1 - Kp) * (q2 - Kp)) / ((1 + q1 * Kp) * (1 + q2 * Kp));
 
 				if (zplus >= 0.0f)
 				{
@@ -634,8 +634,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 
 				int iNp = cvRound(Np * 100); // [0, 100]
 
-				if (0 <= iNp	&& iNp < ACC_N_SIZE &&
-					0 <= rhoDeg	&& rhoDeg < ACC_R_SIZE
+				if (0 <= iNp && iNp < ACC_N_SIZE &&
+					0 <= rhoDeg && rhoDeg < ACC_R_SIZE
 					)
 				{
 					++accN[iNp];	// Increment N accumulator
@@ -648,14 +648,14 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 			{
 				float q4 = data_ik.Sb[ik2];
 
-				float q5xq4 = q5*q4;
+				float q5xq4 = q5 * q4;
 
 				// See Eq. [13-18] in the paper
 
 				float a = (q1xq2 - q5xq4);
-				float b = (q5xq4 + 1)*(q1 + q2) - (q1xq2 + 1)*(q5 + q4);
-				float Kp = (-b + sqrt(b*b + 4 * a*a)) / (2 * a);
-				float zplus = ((q1 - Kp)*(q2 - Kp)) / ((1 + q1*Kp)*(1 + q2*Kp));
+				float b = (q5xq4 + 1) * (q1 + q2) - (q1xq2 + 1) * (q5 + q4);
+				float Kp = (-b + sqrt(b * b + 4 * a * a)) / (2 * a);
+				float zplus = ((q1 - Kp) * (q2 - Kp)) / ((1 + q1 * Kp) * (1 + q2 * Kp));
 
 				if (zplus >= 0.0f)
 				{
@@ -677,8 +677,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 
 				int iNp = cvRound(Np * 100); // [0, 100]
 
-				if (0 <= iNp	&& iNp < ACC_N_SIZE &&
-					0 <= rhoDeg	&& rhoDeg < ACC_R_SIZE
+				if (0 <= iNp && iNp < ACC_N_SIZE &&
+					0 <= rhoDeg && rhoDeg < ACC_R_SIZE
 					)
 				{
 					++accN[iNp];		// Increment N accumulator
@@ -699,20 +699,20 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 		{
 			float q2 = data_ij.Sb[ij2];
 
-			float q1xq2 = q1*q2;
+			float q1xq2 = q1 * q2;
 
 			for (int ik2 = 0; ik2 < sz_ik2; ++ik2)
 			{
 				float q4 = data_ik.Sb[ik2];
 
-				float q3xq4 = q3*q4;
+				float q3xq4 = q3 * q4;
 
 				// See Eq. [13-18] in the paper
 
 				float a = (q1xq2 - q3xq4);
-				float b = (q3xq4 + 1)*(q1 + q2) - (q1xq2 + 1)*(q3 + q4);
-				float Kp = (-b + sqrt(b*b + 4 * a*a)) / (2 * a);
-				float zplus = ((q1 - Kp)*(q2 - Kp)) / ((1 + q1*Kp)*(1 + q2*Kp));
+				float b = (q3xq4 + 1) * (q1 + q2) - (q1xq2 + 1) * (q3 + q4);
+				float Kp = (-b + sqrt(b * b + 4 * a * a)) / (2 * a);
+				float zplus = ((q1 - Kp) * (q2 - Kp)) / ((1 + q1 * Kp) * (1 + q2 * Kp));
 
 				if (zplus >= 0.0f)
 				{
@@ -734,8 +734,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 
 				int iNp = cvRound(Np * 100); // [0, 100]
 
-				if (0 <= iNp	&& iNp < ACC_N_SIZE &&
-					0 <= rhoDeg	&& rhoDeg < ACC_R_SIZE
+				if (0 <= iNp && iNp < ACC_N_SIZE &&
+					0 <= rhoDeg && rhoDeg < ACC_R_SIZE
 					)
 				{
 					++accN[iNp];		// Increment N accumulator
@@ -748,14 +748,14 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 			{
 				float q4 = data_ik.Sa[ik1];
 
-				float q5xq4 = q5*q4;
+				float q5xq4 = q5 * q4;
 
 				// See Eq. [13-18] in the paper
 
 				float a = (q1xq2 - q5xq4);
-				float b = (q5xq4 + 1)*(q1 + q2) - (q1xq2 + 1)*(q5 + q4);
-				float Kp = (-b + sqrt(b*b + 4 * a*a)) / (2 * a);
-				float zplus = ((q1 - Kp)*(q2 - Kp)) / ((1 + q1*Kp)*(1 + q2*Kp));
+				float b = (q5xq4 + 1) * (q1 + q2) - (q1xq2 + 1) * (q5 + q4);
+				float Kp = (-b + sqrt(b * b + 4 * a * a)) / (2 * a);
+				float zplus = ((q1 - Kp) * (q2 - Kp)) / ((1 + q1 * Kp) * (1 + q2 * Kp));
 
 				if (zplus >= 0.0f)
 				{
@@ -777,8 +777,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 
 				int iNp = cvRound(Np * 100); // [0, 100]
 
-				if (0 <= iNp	&& iNp < ACC_N_SIZE &&
-					0 <= rhoDeg	&& rhoDeg < ACC_R_SIZE
+				if (0 <= iNp && iNp < ACC_N_SIZE &&
+					0 <= rhoDeg && rhoDeg < ACC_R_SIZE
 					)
 				{
 					++accN[iNp];		// Increment N accumulator
@@ -804,10 +804,10 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	for (ushort l = 0; l < sz_ei; ++l)
 	{
 		Point& pp = edge_i[l];
-		float sk = 1.f / sqrt(Kp*Kp + 1.f);
-		float x0 = ((pp.x - a0) * sk) + (((pp.y - b0)*Kp) * sk);
+		float sk = 1.f / sqrt(Kp * Kp + 1.f);
+		float x0 = ((pp.x - a0) * sk) + (((pp.y - b0) * Kp) * sk);
 		float y0 = -(((pp.x - a0) * Kp) * sk) + ((pp.y - b0) * sk);
-		float Ax = sqrt((x0*x0*Np*Np + y0*y0) / ((Np*Np)*(1.f + Kp*Kp)));
+		float Ax = sqrt((x0 * x0 * Np * Np + y0 * y0) / ((Np * Np) * (1.f + Kp * Kp)));
 		int A = cvRound(abs(Ax / cos(rho)));
 		if ((0 <= A) && (A < ACC_A_SIZE))
 		{
@@ -818,10 +818,10 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	for (ushort l = 0; l < sz_ej; ++l)
 	{
 		Point& pp = edge_j[l];
-		float sk = 1.f / sqrt(Kp*Kp + 1.f);
-		float x0 = ((pp.x - a0) * sk) + (((pp.y - b0)*Kp) * sk);
+		float sk = 1.f / sqrt(Kp * Kp + 1.f);
+		float x0 = ((pp.x - a0) * sk) + (((pp.y - b0) * Kp) * sk);
 		float y0 = -(((pp.x - a0) * Kp) * sk) + ((pp.y - b0) * sk);
-		float Ax = sqrt((x0*x0*Np*Np + y0*y0) / ((Np*Np)*(1.f + Kp*Kp)));
+		float Ax = sqrt((x0 * x0 * Np * Np + y0 * y0) / ((Np * Np) * (1.f + Kp * Kp)));
 		int A = cvRound(abs(Ax / cos(rho)));
 		if ((0 <= A) && (A < ACC_A_SIZE))
 		{
@@ -832,10 +832,10 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	for (ushort l = 0; l < sz_ek; ++l)
 	{
 		Point& pp = edge_k[l];
-		float sk = 1.f / sqrt(Kp*Kp + 1.f);
-		float x0 = ((pp.x - a0) * sk) + (((pp.y - b0)*Kp) * sk);
+		float sk = 1.f / sqrt(Kp * Kp + 1.f);
+		float x0 = ((pp.x - a0) * sk) + (((pp.y - b0) * Kp) * sk);
 		float y0 = -(((pp.x - a0) * Kp) * sk) + ((pp.y - b0) * sk);
-		float Ax = sqrt((x0*x0*Np*Np + y0*y0) / ((Np*Np)*(1.f + Kp*Kp)));
+		float Ax = sqrt((x0 * x0 * Np * Np + y0 * y0) / ((Np * Np) * (1.f + Kp * Kp)));
 		int A = cvRound(abs(Ax / cos(rho)));
 		if ((0 <= A) && (A < ACC_A_SIZE))
 		{
@@ -851,7 +851,7 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	float fB = abs(fA * Np);
 
 	// Got all ellipse parameters!
-	Ellipse ell(a0, b0, fA, fB, fmod(rho + float(CV_PI)*2.f, float(CV_PI)));
+	Ellipse ell(a0, b0, fA, fB, fmod(rho + float(CV_PI) * 2.f, float(CV_PI)));
 
 	Toc(3); //estimation
 	Tac(4); //validation
@@ -872,10 +872,10 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	{
 		float tx = float(edge_i[l].x) - ell._xc;
 		float ty = float(edge_i[l].y) - ell._yc;
-		float rx = (tx*_cos - ty*_sin);
-		float ry = (tx*_sin + ty*_cos);
+		float rx = (tx * _cos - ty * _sin);
+		float ry = (tx * _sin + ty * _cos);
 
-		float h = (rx*rx)*invA2 + (ry*ry)*invB2;
+		float h = (rx * rx) * invA2 + (ry * ry) * invB2;
 		if (abs(h - 1.f) < _fDistanceToEllipseContour)
 		{
 			++counter_on_perimeter;
@@ -886,10 +886,10 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	{
 		float tx = float(edge_j[l].x) - ell._xc;
 		float ty = float(edge_j[l].y) - ell._yc;
-		float rx = (tx*_cos - ty*_sin);
-		float ry = (tx*_sin + ty*_cos);
+		float rx = (tx * _cos - ty * _sin);
+		float ry = (tx * _sin + ty * _cos);
 
-		float h = (rx*rx)*invA2 + (ry*ry)*invB2;
+		float h = (rx * rx) * invA2 + (ry * ry) * invB2;
 		if (abs(h - 1.f) < _fDistanceToEllipseContour)
 		{
 			++counter_on_perimeter;
@@ -900,10 +900,10 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 	{
 		float tx = float(edge_k[l].x) - ell._xc;
 		float ty = float(edge_k[l].y) - ell._yc;
-		float rx = (tx*_cos - ty*_sin);
-		float ry = (tx*_sin + ty*_cos);
+		float rx = (tx * _cos - ty * _sin);
+		float ry = (tx * _sin + ty * _cos);
 
-		float h = (rx*rx)*invA2 + (ry*ry)*invB2;
+		float h = (rx * rx) * invA2 + (ry * ry) * invB2;
 		if (abs(h - 1.f) < _fDistanceToEllipseContour)
 		{
 			++counter_on_perimeter;
@@ -946,8 +946,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 		p1.y -= ell._yc;
 		p2.x -= ell._xc;
 		p2.y -= ell._yc;
-		Point2f r1((p1.x*_cos - p1.y*_sin), (p1.x*_sin + p1.y*_cos));
-		Point2f r2((p2.x*_cos - p2.y*_sin), (p2.x*_sin + p2.y*_cos));
+		Point2f r1((p1.x * _cos - p1.y * _sin), (p1.x * _sin + p1.y * _cos));
+		Point2f r2((p2.x * _cos - p2.y * _sin), (p2.x * _sin + p2.y * _cos));
 		di = abs(r2.x - r1.x) + abs(r2.y - r1.y);
 	}
 	{
@@ -957,8 +957,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 		p1.y -= ell._yc;
 		p2.x -= ell._xc;
 		p2.y -= ell._yc;
-		Point2f r1((p1.x*_cos - p1.y*_sin), (p1.x*_sin + p1.y*_cos));
-		Point2f r2((p2.x*_cos - p2.y*_sin), (p2.x*_sin + p2.y*_cos));
+		Point2f r1((p1.x * _cos - p1.y * _sin), (p1.x * _sin + p1.y * _cos));
+		Point2f r2((p2.x * _cos - p2.y * _sin), (p2.x * _sin + p2.y * _cos));
 		dj = abs(r2.x - r1.x) + abs(r2.y - r1.y);
 	}
 	{
@@ -968,8 +968,8 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 		p1.y -= ell._yc;
 		p2.x -= ell._xc;
 		p2.y -= ell._yc;
-		Point2f r1((p1.x*_cos - p1.y*_sin), (p1.x*_sin + p1.y*_cos));
-		Point2f r2((p2.x*_cos - p2.y*_sin), (p2.x*_sin + p2.y*_cos));
+		Point2f r1((p1.x * _cos - p1.y * _sin), (p1.x * _sin + p1.y * _cos));
+		Point2f r2((p2.x * _cos - p2.y * _sin), (p2.x * _sin + p2.y * _cos));
 		dk = abs(r2.x - r1.x) + abs(r2.y - r1.y);
 	}
 
@@ -993,7 +993,7 @@ void CEllipseDetectorYaed::FindEllipses(	Point2f& center,
 };
 
 // Get the coordinates of the center, given the intersection of the estimated lines. See Fig. [8] in Sect [3.2.3] in the paper.
-Point2f CEllipseDetectorYaed::GetCenterCoordinates(EllipseData& data_ij, EllipseData& data_ik)
+Point2f CYAED::GetCenterCoordinates(EllipseData& data_ij, EllipseData& data_ik)
 {
 	float xx[7];
 	float yy[7];
@@ -1014,8 +1014,8 @@ Point2f CEllipseDetectorYaed::GetCenterCoordinates(EllipseData& data_ij, Ellipse
 		if (diff == 0.f) diff = 0.00001f;
 
 		float invDen = 1 / diff;
-		xx[2] = (M34.y - q4*M34.x - M12.y + q2*M12.x) * invDen;
-		yy[2] = (q2*M34.y - q4*M12.y + q2*q4*(M12.x - M34.x)) * invDen;
+		xx[2] = (M34.y - q4 * M34.x - M12.y + q2 * M12.x) * invDen;
+		yy[2] = (q2 * M34.y - q4 * M12.y + q2 * q4 * (M12.x - M34.x)) * invDen;
 	}
 
 	{
@@ -1029,8 +1029,8 @@ Point2f CEllipseDetectorYaed::GetCenterCoordinates(EllipseData& data_ij, Ellipse
 		if (diff == 0.f) diff = 0.00001f;
 
 		float invDen = 1 / diff;
-		xx[3] = (M34.y - q4*M34.x - M12.y + q2*M12.x) * invDen;
-		yy[3] = (q2*M34.y - q4*M12.y + q2*q4*(M12.x - M34.x)) * invDen;
+		xx[3] = (M34.y - q4 * M34.x - M12.y + q2 * M12.x) * invDen;
+		yy[3] = (q2 * M34.y - q4 * M12.y + q2 * q4 * (M12.x - M34.x)) * invDen;
 	}
 
 	{
@@ -1044,8 +1044,8 @@ Point2f CEllipseDetectorYaed::GetCenterCoordinates(EllipseData& data_ij, Ellipse
 		if (diff == 0.f) diff = 0.00001f;
 
 		float invDen = 1 / diff;
-		xx[4] = (M34.y - q4*M34.x - M12.y + q2*M12.x) * invDen;
-		yy[4] = (q2*M34.y - q4*M12.y + q2*q4*(M12.x - M34.x)) * invDen;
+		xx[4] = (M34.y - q4 * M34.x - M12.y + q2 * M12.x) * invDen;
+		yy[4] = (q2 * M34.y - q4 * M12.y + q2 * q4 * (M12.x - M34.x)) * invDen;
 	}
 
 	{
@@ -1059,8 +1059,8 @@ Point2f CEllipseDetectorYaed::GetCenterCoordinates(EllipseData& data_ij, Ellipse
 		if (diff == 0.f) diff = 0.00001f;
 
 		float invDen = 1 / diff;
-		xx[5] = (M34.y - q4*M34.x - M12.y + q2*M12.x) * invDen;
-		yy[5] = (q2*M34.y - q4*M12.y + q2*q4*(M12.x - M34.x)) * invDen;
+		xx[5] = (M34.y - q4 * M34.x - M12.y + q2 * M12.x) * invDen;
+		yy[5] = (q2 * M34.y - q4 * M12.y + q2 * q4 * (M12.x - M34.x)) * invDen;
 	}
 
 	xx[6] = (xx[0] + xx[1]) * 0.5f;
@@ -1078,12 +1078,12 @@ Point2f CEllipseDetectorYaed::GetCenterCoordinates(EllipseData& data_ij, Ellipse
 
 
 // Verify triplets of arcs with convexity: i=1, j=2, k=4
-void CEllipseDetectorYaed::Triplets124(VVP& pi,
+void CYAED::Triplets124(VVP& pi,
 	VVP& pj,
 	VVP& pk,
 	std::unordered_map<uint, EllipseData>& data,
 	std::vector<Ellipse>& ellipses
-	)
+)
 {
 	// get arcs length
 	ushort sz_i = ushort(pi.size());
@@ -1211,12 +1211,12 @@ void CEllipseDetectorYaed::Triplets124(VVP& pi,
 
 
 
-void CEllipseDetectorYaed::Triplets231(VVP& pi,
+void CYAED::Triplets231(VVP& pi,
 	VVP& pj,
 	VVP& pk,
 	std::unordered_map<uint, EllipseData>& data,
 	std::vector<Ellipse>& ellipses
-	)
+)
 {
 	ushort sz_i = ushort(pi.size());
 	ushort sz_j = ushort(pj.size());
@@ -1331,12 +1331,12 @@ void CEllipseDetectorYaed::Triplets231(VVP& pi,
 };
 
 
-void CEllipseDetectorYaed::Triplets342(VVP& pi,
+void CYAED::Triplets342(VVP& pi,
 	VVP& pj,
 	VVP& pk,
 	std::unordered_map<uint, EllipseData>& data,
 	std::vector<Ellipse>& ellipses
-	)
+)
 {
 	ushort sz_i = ushort(pi.size());
 	ushort sz_j = ushort(pj.size());
@@ -1454,120 +1454,120 @@ void CEllipseDetectorYaed::Triplets342(VVP& pi,
 
 
 
-void CEllipseDetectorYaed::Triplets413(VVP& pi,
+void CYAED::Triplets413(VVP& pi,
 	VVP& pj,
 	VVP& pk,
 	std::unordered_map<uint, EllipseData>& data,
 	std::vector<Ellipse>& ellipses
-	)
+)
 {
-		ushort sz_i = ushort(pi.size());
-		ushort sz_j = ushort(pj.size());
-		ushort sz_k = ushort(pk.size());
+	ushort sz_i = ushort(pi.size());
+	ushort sz_j = ushort(pj.size());
+	ushort sz_k = ushort(pk.size());
 
-		// For each edge i
-		for (ushort i = 0; i < sz_i; ++i)
+	// For each edge i
+	for (ushort i = 0; i < sz_i; ++i)
+	{
+		VP& edge_i = pi[i];
+		ushort sz_ei = ushort(edge_i.size());
+
+		Point& pif = edge_i[0];
+		Point& pil = edge_i[sz_ei - 1];
+
+		VP rev_i(edge_i.size());
+		reverse_copy(edge_i.begin(), edge_i.end(), rev_i.begin());
+
+		// For each edge j
+		for (ushort j = 0; j < sz_j; ++j)
 		{
-			VP& edge_i = pi[i];
-			ushort sz_ei = ushort(edge_i.size());
+			VP& edge_j = pj[j];
+			ushort sz_ej = ushort(edge_j.size());
 
-			Point& pif = edge_i[0];
-			Point& pil = edge_i[sz_ei - 1];
+			Point& pjf = edge_j[0];
+			Point& pjl = edge_j[sz_ej - 1];
 
-			VP rev_i(edge_i.size());
-			reverse_copy(edge_i.begin(), edge_i.end(), rev_i.begin());
-
-			// For each edge j
-			for (ushort j = 0; j < sz_j; ++j)
+#ifndef DISCARD_CONSTRAINT_POSITION
+			//CONSTRAINTS on position
+			if (pjl.y > pil.y + _fThPosition)  		//is below
 			{
-				VP& edge_j = pj[j];
-				ushort sz_ej = ushort(edge_j.size());
+				//discard
+				continue;
+			}
+#endif
 
-				Point& pjf = edge_j[0];
-				Point& pjl = edge_j[sz_ej - 1];
+			uint key_ij = GenerateKey(PAIR_14, j, i);
+
+			// For each edge k
+			for (ushort k = 0; k < sz_k; ++k)
+			{
+				VP& edge_k = pk[k];
+				ushort sz_ek = ushort(edge_k.size());
+
+				Point& pkf = edge_k[0];
+				Point& pkl = edge_k[sz_ek - 1];
 
 #ifndef DISCARD_CONSTRAINT_POSITION
 				//CONSTRAINTS on position
-				if (pjl.y > pil.y + _fThPosition)  		//is below
+				if (pkl.x > pif.x + _fThPosition)
 				{
 					//discard
 					continue;
 				}
 #endif
+				uint key_ik = GenerateKey(PAIR_34, k, i);
 
-				uint key_ij = GenerateKey(PAIR_14, j, i);
+				// Find centers
 
-				// For each edge k
-				for (ushort k = 0; k < sz_k; ++k)
+				EllipseData data_ij, data_ik;
+
+				if (data.count(key_ij) == 0)
 				{
-					VP& edge_k = pk[k];
-					ushort sz_ek = ushort(edge_k.size());
+					// 4,1 -> OK
+					GetFastCenter(edge_i, edge_j, data_ij);
+					data.insert(std::pair<uint, EllipseData>(key_ij, data_ij));
+				}
+				else
+				{
+					data_ij = data.at(key_ij);
+				}
 
-					Point& pkf = edge_k[0];
-					Point& pkl = edge_k[sz_ek - 1];
+				if (data.count(key_ik) == 0)
+				{
+					// 4,3 -> reverse 4
+					GetFastCenter(rev_i, edge_k, data_ik);
+					data.insert(std::pair<uint, EllipseData>(key_ik, data_ik));
+				}
+				else
+				{
+					data_ik = data.at(key_ik);
+				}
 
-#ifndef DISCARD_CONSTRAINT_POSITION
-					//CONSTRAINTS on position
-					if (pkl.x > pif.x + _fThPosition)
-					{
-						//discard
-						continue;
-					}
-#endif
-					uint key_ik = GenerateKey(PAIR_34, k, i);
-
-					// Find centers
-
-					EllipseData data_ij, data_ik;
-
-					if (data.count(key_ij) == 0)
-					{
-						// 4,1 -> OK
-						GetFastCenter(edge_i, edge_j, data_ij);
-						data.insert(std::pair<uint, EllipseData>(key_ij, data_ij));
-					}
-					else
-					{
-						data_ij = data.at(key_ij);
-					}
-
-					if (data.count(key_ik) == 0)
-					{
-						// 4,3 -> reverse 4
-						GetFastCenter(rev_i, edge_k, data_ik);
-						data.insert(std::pair<uint, EllipseData>(key_ik, data_ik));
-					}
-					else
-					{
-						data_ik = data.at(key_ik);
-					}
-
-					// INVALID CENTERS
-					if (!data_ij.isValid || !data_ik.isValid)
-					{
-						continue;
-					}
+				// INVALID CENTERS
+				if (!data_ij.isValid || !data_ik.isValid)
+				{
+					continue;
+				}
 
 #ifndef DISCARD_CONSTRAINT_CENTER
-					// CONSTRAIN ON CENTERS
-					if (PointDistanceSqr(data_ij.Cab, data_ik.Cab) > _fMaxCenterDistance2)
-					{
-						//discard
-						continue;
-					}
-#endif
-					// Find ellipse parameters
-					Point2f center = GetCenterCoordinates(data_ij, data_ik);
-
-					FindEllipses(center, edge_i, edge_j, edge_k, data_ij, data_ik, ellipses);
-
+				// CONSTRAIN ON CENTERS
+				if (PointDistanceSqr(data_ij.Cab, data_ik.Cab) > _fMaxCenterDistance2)
+				{
+					//discard
+					continue;
 				}
+#endif
+				// Find ellipse parameters
+				Point2f center = GetCenterCoordinates(data_ij, data_ik);
+
+				FindEllipses(center, edge_i, edge_j, edge_k, data_ij, data_ik, ellipses);
+
 			}
 		}
-	};
+	}
+};
 
 
-void CEllipseDetectorYaed::RemoveShortEdges(Mat1b& edges, Mat1b& clean)
+void CYAED::RemoveShortEdges(Mat1b& edges, Mat1b& clean)
 {
 	VVP contours;
 
@@ -1599,10 +1599,10 @@ void CEllipseDetectorYaed::RemoveShortEdges(Mat1b& edges, Mat1b& clean)
 
 
 
-void CEllipseDetectorYaed::PrePeocessing(Mat1b& I,
+void CYAED::PrePeocessing(Mat1b& I,
 	Mat1b& DP,
 	Mat1b& DN
-	)
+)
 {
 
 	Tic(0); //edge detection
@@ -1622,7 +1622,7 @@ void CEllipseDetectorYaed::PrePeocessing(Mat1b& I,
 	Tac(1); //preprocessing
 
 	// For each edge points, compute the edge direction
-	for (int i = 0; i<_szImg.height; ++i)
+	for (int i = 0; i < _szImg.height; ++i)
 	{
 		short* _dx = DX.ptr<short>(i);
 		short* _dy = DY.ptr<short>(i);
@@ -1630,7 +1630,7 @@ void CEllipseDetectorYaed::PrePeocessing(Mat1b& I,
 		uchar* _dp = DP.ptr<uchar>(i);
 		uchar* _dn = DN.ptr<uchar>(i);
 
-		for (int j = 0; j<_szImg.width; ++j)
+		for (int j = 0; j < _szImg.width; ++j)
 		{
 			if (!((_e[j] <= 0) || (_dx[j] == 0) || (_dy[j] == 0)))
 			{
@@ -1646,7 +1646,7 @@ void CEllipseDetectorYaed::PrePeocessing(Mat1b& I,
 };
 
 
-void CEllipseDetectorYaed::DetectAfterPreProcessing(std::vector<Ellipse>& ellipses, Mat1b& E, Mat1f& PHI)
+void CYAED::DetectAfterPreProcessing(std::vector<Ellipse>& ellipses, Mat1b& E, Mat1f& PHI)
 {
 	// Set the image size
 	_szImg = E.size();
@@ -1656,19 +1656,19 @@ void CEllipseDetectorYaed::DetectAfterPreProcessing(std::vector<Ellipse>& ellips
 	Mat1b DN = Mat1b::zeros(_szImg);		// arcs along negative diagonal
 
 	// For each edge points, compute the edge direction
-	for (int i = 0; i<_szImg.height; ++i)
+	for (int i = 0; i < _szImg.height; ++i)
 	{
 		float* _phi = PHI.ptr<float>(i);
 		uchar* _e = E.ptr<uchar>(i);
 		uchar* _dp = DP.ptr<uchar>(i);
 		uchar* _dn = DN.ptr<uchar>(i);
 
-		for (int j = 0; j<_szImg.width; ++j)
+		for (int j = 0; j < _szImg.width; ++j)
 		{
 			if ((_e[j] > 0) && (_phi[j] != 0))
 			{
 				// Angle
-				
+
 				// along positive or negative diagonal
 				if (_phi[j] > 0)	_dp[j] = (uchar)255;
 				else if (_phi[j] < 0)	_dn[j] = (uchar)255;
@@ -1713,7 +1713,7 @@ void CEllipseDetectorYaed::DetectAfterPreProcessing(std::vector<Ellipse>& ellips
 };
 
 
-void CEllipseDetectorYaed::Detect(Mat1b& I, std::vector<Ellipse>& ellipses)
+void CYAED::Detect(Mat1b& I, std::vector<Ellipse>& ellipses)
 {
 	Tic(1); //prepare data structure
 
@@ -1752,35 +1752,35 @@ void CEllipseDetectorYaed::Detect(Mat1b& I, std::vector<Ellipse>& ellipses)
 
 
 	// DEBUG
-	Mat3b out(I.rows, I.cols, Vec3b(0,0,0));
-	for(unsigned i=0; i<points_1.size(); ++i)
+	Mat3b out(I.rows, I.cols, Vec3b(0, 0, 0));
+	for (unsigned i = 0; i < points_1.size(); ++i)
 	{
 		//Vec3b color(rand()%255, 128+rand()%127, 128+rand()%127);
-		Vec3b color(255,0,0);
-		for(unsigned j=0; j<points_1[i].size(); ++j)
+		Vec3b color(255, 0, 0);
+		for (unsigned j = 0; j < points_1[i].size(); ++j)
 			out(points_1[i][j]) = color;
 	}
 
-	for(unsigned i=0; i<points_2.size(); ++i)
+	for (unsigned i = 0; i < points_2.size(); ++i)
 	{
 		//Vec3b color(rand()%255, 128+rand()%127, 128+rand()%127);
-		Vec3b color(0,255,0);
-		for(unsigned j=0; j<points_2[i].size(); ++j)
+		Vec3b color(0, 255, 0);
+		for (unsigned j = 0; j < points_2[i].size(); ++j)
 			out(points_2[i][j]) = color;
 	}
-	for(unsigned i=0; i<points_3.size(); ++i)
+	for (unsigned i = 0; i < points_3.size(); ++i)
 	{
 		//Vec3b color(rand()%255, 128+rand()%127, 128+rand()%127);
-		Vec3b color(0,0,255);
-		for(unsigned j=0; j<points_3[i].size(); ++j)
+		Vec3b color(0, 0, 255);
+		for (unsigned j = 0; j < points_3[i].size(); ++j)
 			out(points_3[i][j]) = color;
 	}
 
-	for(unsigned i=0; i<points_4.size(); ++i)
+	for (unsigned i = 0; i < points_4.size(); ++i)
 	{
 		//Vec3b color(rand()%255, 128+rand()%127, 128+rand()%127);
-		Vec3b color(255,0,255);
-		for(unsigned j=0; j<points_4[i].size(); ++j)
+		Vec3b color(255, 0, 255);
+		for (unsigned j = 0; j < points_4[i].size(); ++j)
 			out(points_4[i][j]) = color;
 	}
 
@@ -1819,7 +1819,7 @@ void CEllipseDetectorYaed::Detect(Mat1b& I, std::vector<Ellipse>& ellipses)
 
 
 // Ellipse clustering procedure. See Sect [3.3.2] in the paper.
-void CEllipseDetectorYaed::ClusterEllipses(std::vector<Ellipse>& ellipses)
+void CYAED::ClusterEllipses(std::vector<Ellipse>& ellipses)
 {
 	float th_Da = 0.1f;
 	float th_Db = 0.1f;
@@ -1835,7 +1835,7 @@ void CEllipseDetectorYaed::ClusterEllipses(std::vector<Ellipse>& ellipses)
 	std::vector<Ellipse> clusters;
 	clusters.push_back(ellipses[0]);
 
-	for (int i = 1; i<iNumOfEllipses; ++i)
+	for (int i = 1; i < iNumOfEllipses; ++i)
 	{
 		Ellipse& e1 = ellipses[i];
 
@@ -1844,7 +1844,7 @@ void CEllipseDetectorYaed::ClusterEllipses(std::vector<Ellipse>& ellipses)
 		float ba_e1 = e1._b / e1._a;
 
 		bool bFoundCluster = false;
-		for (int j = 0; j<sz_clusters; ++j)
+		for (int j = 0; j < sz_clusters; ++j)
 		{
 			Ellipse& e2 = clusters[j];
 
@@ -1853,7 +1853,7 @@ void CEllipseDetectorYaed::ClusterEllipses(std::vector<Ellipse>& ellipses)
 			th_Dc *= th_Dc;
 
 			// Centers
-			float Dc = ((e1._xc - e2._xc)*(e1._xc - e2._xc) + (e1._yc - e2._yc)*(e1._yc - e2._yc));
+			float Dc = ((e1._xc - e2._xc) * (e1._xc - e2._xc) + (e1._yc - e2._yc) * (e1._yc - e2._yc));
 			if (Dc > th_Dc)
 			{
 				//not same cluster
@@ -1903,7 +1903,7 @@ void CEllipseDetectorYaed::ClusterEllipses(std::vector<Ellipse>& ellipses)
 
 
 //Draw at most iTopN detected ellipses.
-void CEllipseDetectorYaed::DrawDetectedEllipses(Mat3b& output, std::vector<Ellipse>& ellipses, int iTopN, int thickness)
+void CYAED::DrawDetectedEllipses(Mat3b& output, std::vector<Ellipse>& ellipses, int iTopN, int thickness)
 {
 	int sz_ell = int(ellipses.size());
 	int n = (iTopN == 0) ? sz_ell : min(iTopN, sz_ell);
@@ -1912,6 +1912,6 @@ void CEllipseDetectorYaed::DrawDetectedEllipses(Mat3b& output, std::vector<Ellip
 		Ellipse& e = ellipses[n - i - 1];
 		int g = cvRound(e._score * 255.f);
 		Scalar color(0, g, 0);
-		ellipse(output, Point(cvRound(e._xc), cvRound(e._yc)), Size(cvRound(e._a), cvRound(e._b)), e._rad*180.0 / CV_PI, 0.0, 360.0, color, thickness);
+		ellipse(output, Point(cvRound(e._xc), cvRound(e._yc)), Size(cvRound(e._a), cvRound(e._b)), e._rad * 180.0 / CV_PI, 0.0, 360.0, color, thickness);
 	}
 }
